@@ -1,27 +1,22 @@
 // utils/firebase.js
 
-/**
- * Módulos essenciais
- * @module firebase-admin - SDK oficial para integração com serviços Firebase
- * @module serviceAccountKey - Credenciais de serviço (NUNCA versionar!)
- */
 const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json');
-require('dotenv').config(); // Carrega variáveis de ambiente
+require('dotenv').config(); // Carrega variáveis do .env se existir
 
-/**
- * Inicialização do Firebase Admin SDK
- * @description Configuração segura usando service account e variáveis de ambiente
- */
+let serviceAccount;
+
+if (process.env.FIREBASE_CONFIG) {
+  // Carrega o JSON das credenciais da variável de ambiente
+  serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
+} else {
+  // Fallback para ambiente local usando o arquivo .json
+  serviceAccount = require('../serviceAccountKey.json');
+}
+
+// Inicialização do Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
 
-/**
- * Instâncias exportadas
- * @const db - Referência ao Firestore Database
- * @const admin - Instância completa do Admin SDK (para auth, storage, etc)
- */
 const db = admin.firestore();
 module.exports = { admin, db };
